@@ -1,0 +1,19 @@
+SubDir src ;
+
+C++FLAGS = $(C++FLAGS) -Wall ;
+C++FLAGS = $(C++FLAGS) -g ;
+
+Main PCShifter :
+	pcs_app.cpp
+	pcs_window.cpp
+	gameview.cpp
+	;
+
+if $(OS) = HAIKU {
+	Object Resource.rsrc : Resource.rdef ;
+	Object PCShifter : Resource.rsrc ;
+}
+
+BELIBS = -lbe -ltranslation ;
+
+LINKLIBS on PCShifter = $(BELIBS) ;
