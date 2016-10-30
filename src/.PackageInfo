@@ -1,0 +1,25 @@
+name			PCShifter
+version			0.3.0-1
+architecture	x86_gcc2
+summary		"A simple game"
+description		"Waste your time with this clone of a popular PocketPC game!"
+packager		"Andreas Herzig <beos@herzig-net.de>"
+vendor			"N3S"
+licenses {
+	"MIT"
+}
+copyrights {
+	"Copyright (C) 2003-2016 by Andreas Herzig <beos@herzig-net.de>"
+}
+provides {
+    DataMage = 0.3.0
+    app:PCShifter
+}
+requires {
+	haiku
+	lib:libdatawand
+}
+urls {
+	"https://herzig-net.de/prog/?page=pcshifter"
+	"https://github.com/ando23/PCShifter"
+}
