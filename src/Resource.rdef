@@ -55,22 +55,22 @@ resource mini_icon array {
 	$"FFFFFFFFFF537474745353FFFFFFFFFF"
 };
 
-resource app_signature "application/N3S.PCShifter";
+resource app_signature "application/x-vnd.PCShifter";
 
 resource app_version {
 	major  = 0,
-	middle = 2,
+	middle = 3,
 	minor  = 0,
 
 	variety = B_APPV_DEVELOPMENT,
 	internal = 0,
 
-	short_info = #'CSTR' array {
-
-	},
-	long_info = #'CSTR' array {
-
-	}
+	short_info = "Simple game",
+	long_info = "Clone of a PocketPC game where you have to remove adjacent balls to get points."
 };
 
 resource app_flags B_MULTIPLE_LAUNCH;
+
+// resource bitmap "res/kugel_rot.bmp";
+
+

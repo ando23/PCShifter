@@ -12,12 +12,11 @@ copyrights {
 	"Copyright (C) 2003-2016 by Andreas Herzig <beos@herzig-net.de>"
 }
 provides {
-    DataMage = 0.3.0
+    PCShifter = 0.3.0
     app:PCShifter
 }
 requires {
 	haiku
-	lib:libdatawand
 }
 urls {
 	"https://herzig-net.de/prog/?page=pcshifter"

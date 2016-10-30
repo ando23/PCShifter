@@ -1,6 +1,8 @@
 SubDir src ;
 
 C++FLAGS = $(C++FLAGS) -Wall ;
+
+# Debug-Info:
 C++FLAGS = $(C++FLAGS) -g ;
 
 Main PCShifter :
