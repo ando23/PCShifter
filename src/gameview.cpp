@@ -1,12 +1,16 @@
 #include "gameview.h"
+#include <Bitmap.h>
+#include <TranslatorRoster.h>
+#include <TranslationUtils.h>
+
+#define base BView
 
 
 GameView::GameView(BRect frame, settings_t *set) :
-	BView(frame, "GameView", B_FOLLOW_ALL, B_WILL_DRAW | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE /*| B_PULSE_NEEDED */)
+	base(frame, "GameView", B_FOLLOW_ALL, B_WILL_DRAW | B_FRAME_EVENTS | B_FULL_UPDATE_ON_RESIZE /*| B_PULSE_NEEDED */)
+	, settings(set)
+	, _debug(false)
 {
-	// debug:
-	settings = set;
-
 	srand(time(0));
 	//NewGame(settings->GameMode);
 	
@@ -15,6 +19,18 @@ GameView::GameView(BRect frame, settings_t *set) :
 	
 	radius_x = abs_x/3;
 	radius_y = abs_y/3;
+	
+	for (int x=1; x<BOARD_WIDTH+1; x++) {
+		board[0][x].color = NONE;
+		board[0][x].marked = false;
+		
+		for (int y=1; y<BOARD_WIDTH+1; y++) {
+			board[y][x].color = NONE;
+			board[y][x].marked = false;
+		}
+	}
+	
+	LoadBitmaps();
 }
 
 GameView::~GameView()
@@ -31,11 +47,13 @@ GameView::Draw(BRect frame)
 	pattern pat_m	= B_SOLID_HIGH;
 	
 	
-	SetHighColor(220,220,220,0);
-	
 	BRect f = Bounds();
-	f.right = abs_x;
 	
+	SetHighColor(255,255,255);
+	FillRect(f);
+	
+	SetHighColor(220,220,220);
+	f.right = abs_x;
 	FillRect(f);
 	f.OffsetBy((BOARD_WIDTH+1)*abs_x,0);
 	FillRect(f);
@@ -69,25 +87,46 @@ GameView::Draw(BRect frame)
 				rgb_color h;
 				GetColor( col, h );
 				
-				if (board[y+1][x].marked) {
-					SetHighColor(h);
-					FillRect(BRect(x*abs_x, y*abs_y, (x+1)*abs_x, (y+1)*abs_y ), pat_m );
-					SetHighColor(0,0,0,0);
-					StrokeEllipse(pos, radius_x, radius_y, pat);
+				BRect tile = BRect( x * abs_x, y * abs_y, (x+1) * abs_x - 1, (y+1)*abs_y - 1 );
+				
+				if (settings->UseBitmaps) {
+					BRect bitmapRect = tile;
+					bitmapRect.InsetBy(abs_x / 20, abs_y / 20);
+					BBitmap* bitmap = GetBitmap(col);
+					if (bitmap != NULL) {
+						DrawBitmap( bitmap, bitmapRect);
+					}
+					if (board[y+1][x].marked) {
+						SetHighColor(h.red, h.green, h.blue, 128);
+						SetBlendingMode(B_CONSTANT_ALPHA, B_ALPHA_OVERLAY);
+						SetDrawingMode(B_OP_ALPHA);
+						FillRect(tile, pat_m );
+						SetDrawingMode(B_OP_COPY);
+					}
 				}
 				else {
-					
-					SetHighColor(h);
-					FillEllipse(pos, radius_x, radius_y, pat);
-					SetHighColor(0,0,0,0);
-					StrokeEllipse(pos, radius_x, radius_y, pat);
+				
+					if (board[y+1][x].marked) {
+						SetHighColor(h);
+						FillRect(tile, pat_m );
+						SetHighColor(0,0,0,0);
+						StrokeEllipse(pos, radius_x, radius_y, pat);
+					}
+					else {
+						
+						SetHighColor(h);
+						FillEllipse(pos, radius_x, radius_y, pat);
+						SetHighColor(0,0,0,0);
+						StrokeEllipse(pos, radius_x, radius_y, pat);
+					}
 				}
 			}
 		}
 	}
 
 	// Score	
-	SetHighColor(0,0,0,0);
+	SetHighColor(0,0,0);
+	SetLowColor(220,220,220);
 	BString sScore;
 	sScore << _T("Score: ") << score;
 
@@ -116,7 +155,7 @@ GameView::MouseDown(BPoint point)
 		
 	sStatus = "";
 
-	BView::MouseDown(point);
+	base::MouseDown(point);
 	
 	int pos_x = (int)(point.x / abs_x);
 	int pos_y = (int)(point.y / abs_y) + 1;
@@ -161,20 +200,20 @@ GameView::MouseDown(BPoint point)
 void
 GameView::FrameResized(float width, float height)
 {
-	abs_x = (width) / BOARD_WIDTH+2;
+	abs_x = (width) / (BOARD_WIDTH+2);
 	abs_y = (height) / BOARD_HEIGHT;
 	
 	radius_x = abs_x/3;
 	radius_y = abs_y/3;
 
-	BView::FrameResized(width, height);
+	base::FrameResized(width, height);
 }
 
 
 void
 GameView::GetColor( int color, rgb_color& col )
 {
-	if (settings->AlternativeColors) {
+	if (_debug || settings->AlternativeColors) {
 		switch (color) {
 		case RED:
 			col.red = 255, col.green = 0, col.blue = 0;
@@ -228,6 +267,34 @@ GameView::GetColor( int color, rgb_color& col )
 			break;
 		};
 	}
+}
+
+BBitmap*
+GameView::GetBitmap(int color)
+{
+	if (color < 0 || color >= MAX_COLOR)
+		return NULL;
+		
+	BBitmap** list = _bitmapsSmall;
+	return list[color];		
+}
+
+void
+GameView::LoadBitmaps()
+{
+	_bitmapsSmall[NONE] = BTranslationUtils::GetBitmap( "res/kugel_weiss.bmp" );
+	_bitmapsSmall[RED] = BTranslationUtils::GetBitmap( "res/kugel_rot.bmp" );
+	_bitmapsSmall[YELLOW] = BTranslationUtils::GetBitmap( "res/kugel_gelb.bmp" );
+	_bitmapsSmall[GREEN] = BTranslationUtils::GetBitmap( "res/kugel_gruen.bmp" );
+	_bitmapsSmall[BLUE] = BTranslationUtils::GetBitmap( "res/kugel_blau.bmp" );
+	_bitmapsSmall[PURPLE] = BTranslationUtils::GetBitmap( "res/kugel_orange.bmp" );
+
+	_bitmapsLarge[NONE] = BTranslationUtils::GetBitmap( "res/kugel48_weiss.bmp" );
+	_bitmapsLarge[RED] = BTranslationUtils::GetBitmap( "res/kugel48_rot.bmp" );
+	_bitmapsLarge[YELLOW] = BTranslationUtils::GetBitmap( "res/kugel48_gelb.bmp" );
+	_bitmapsLarge[GREEN] = BTranslationUtils::GetBitmap( "res/kugel48_gruen.bmp" );
+	_bitmapsLarge[BLUE] = BTranslationUtils::GetBitmap( "res/kugel48_blau.bmp" );
+	_bitmapsLarge[PURPLE] = BTranslationUtils::GetBitmap( "res/kugel48_orange.bmp" );
 }
 
 

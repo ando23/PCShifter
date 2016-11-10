@@ -369,10 +369,9 @@ PCSWindow::HandleGameOver()
 	if (score>highscore) {
 		text << _T("You have achieved a new Highscore!");
 		
-		char sss[1024];
-		const char* username = cuserid(sss);
+		const char* username = cuserid(NULL);
 		
-		if (username!=NULL)		
+		if (username!=NULL)
 			highscores[10].Name.SetTo(username);
 		else
 			highscores[10].Name.SetTo("Be-Nutzer");
@@ -498,7 +497,7 @@ void
 PCSWindow::UpdateOptions()
 {
 	// Unused:
-	menUseBitmaps->SetEnabled(false);
+	menUseBitmaps->SetMarked(settings.UseBitmaps);
 	menAlternativeColors->SetMarked( settings.AlternativeColors );
 	menShade->SetEnabled(false);
 	menBubble->SetEnabled(false);

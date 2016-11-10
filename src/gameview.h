@@ -9,6 +9,8 @@
 //#include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <Bitmap.h>
+
 
 class GameView : public BView
 {
@@ -31,6 +33,7 @@ private:
 	void			mark(int x, int y, const int col, int& anz);
 	int				MarkClicked( int x, int y );
 	void			GetColor( int color, rgb_color& col );
+	BBitmap*		GetBitmap(int color);
 	int				RemoveMarked();
 	void			Collapse();
 	
@@ -45,6 +48,8 @@ private:
 	
 	// disables the view and notifies the window
 	void			GameOver();
+	
+	void			LoadBitmaps();
 
 	
 private:
@@ -63,6 +68,11 @@ private:
 	float			abs_x, abs_y, radius_x, radius_y;
 	
 	settings_t		*settings;
+	
+	BBitmap*	_bitmapsSmall[6];
+	BBitmap*	_bitmapsLarge[6];
+
+	bool			_debug;
 };
 
 

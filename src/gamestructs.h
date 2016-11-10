@@ -3,8 +3,8 @@
 
 struct field
 {
-	int		color;
-	bool	marked;	
+	unsigned char color;
+	bool marked;	
 };
 
 enum	GameMode_t
